@@ -41,15 +41,32 @@ FROM base
 # Update package cache and install dependencies
 RUN apt-get update && \
     apt-get install -y \
-        python3.8 python3-pip python3-setuptools python3-dev \
         wget \
+        git \
         xvfb libxv1 x11vnc \
         imagemagick \
         mupen64plus-ui-console \
         mupen64plus-data \
         nano \
         ffmpeg \
-        libjson-c4
+        libjson-c4 \
+        software-properties-common
+
+# Install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    /opt/conda/bin/conda clean -tipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc
+
+# Set path to conda
+ENV PATH /opt/conda/bin:$PATH
+
+# Updating Anaconda packages
+RUN conda update conda -y
+RUN conda update --all -y
 
 # Install VirtualGL (provides vglrun to allow us to run the emulator in XVFB)
 # (Check for new releases here: https://github.com/VirtualGL/virtualgl/releases)
@@ -58,8 +75,45 @@ RUN wget "https://sourceforge.net/projects/virtualgl/files/${VIRTUALGL_VERSION}/
     apt install ./virtualgl_${VIRTUALGL_VERSION}_amd64.deb && \
     rm virtualgl_${VIRTUALGL_VERSION}_amd64.deb
 
+# Install Cuda
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
+    apt-get update && \
+    apt-get -y install cuda
+
+# Install Cudnn
+ENV OS=ubuntu2004
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/cuda-${OS}.pin && \
+    mv cuda-${OS}.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/ /" && \
+    apt-get update
+
+ENV CUDNN_VERSION=8.1.1.*
+ENV CUDA_VERSION=cuda11.2
+RUN apt-get -y install libcudnn8=${CUDNN_VERSION}-1+${CUDA_VERSION} && \
+    apt-get -y install libcudnn8-dev=${CUDNN_VERSION}-1+${CUDA_VERSION}
+
+RUN conda install astunparse numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses
+RUN conda install -c pytorch magma-cuda112
+
+# Build PyTorch From Source
+RUN git clone --recursive https://github.com/pytorch/pytorch && \
+    cd pytorch && \
+    # if you are updating an existing checkout
+    git submodule sync && \
+    git submodule update --init --recursive
+
+RUN cd pytorch && \
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"} && \
+    export USE_CUDA=1 && \
+    python setup.py install
+
 # Install dependencies (here for caching)
-RUN pip3 install \
+RUN pip install --upgrade pip
+RUN pip install \
     gym \
     numpy \
     PyYAML \
@@ -78,7 +132,7 @@ COPY [ "./gym_mupen64plus/envs/Smash/smash.sra", "/root/.local/share/mupen64plus
 
 # Install requirements & this package
 WORKDIR /src/gym-mupen64plus
-RUN pip3 install -e .
+RUN pip install -e .
 
 # Declare ROMs as a volume for mounting a host path outside the container
 VOLUME /src/gym-mupen64plus/gym_mupen64plus/ROMs/
