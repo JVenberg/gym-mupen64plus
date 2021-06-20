@@ -3,7 +3,7 @@ version: '2.3'
 services:
 
   xvfbsrv:
-    image: gym_mupen64plus
+    image: jvenberg/gym-mupen64plus:0.0.5
     ports:
       - "6000:6000"
     entrypoint: [
@@ -17,7 +17,7 @@ services:
 
 
   vncsrv:
-    image: gym_mupen64plus
+    image: jvenberg/gym-mupen64plus:0.0.5
     environment:
       - DISPLAY=xvfbsrv:0
     ports:
@@ -27,7 +27,7 @@ services:
 
 
   emulator:
-    image: gym_mupen64plus
+    image: jvenberg/gym-mupen64plus:0.0.5
     environment:
       - DISPLAY=xvfbsrv:0
     volumes:
@@ -51,12 +51,12 @@ services:
 
 
   agent:
-    image: gym_mupen64plus
+    image: jvenberg/gym-mupen64plus:0.0.5
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       - DISPLAY=xvfbsrv:0
       - EXTERNAL_EMULATOR=True
-    command: [ 'python', '-u', 'gym-mupen64plus/example.py' ] # -u for unbuffered output so logs show immediately (in theory)
+    command: [ 'python3', '-u', 'gym-mupen64plus/example.py' ] # -u for unbuffered output so logs show immediately (in theory)
     depends_on: [ xvfbsrv ]
