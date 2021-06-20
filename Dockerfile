@@ -102,14 +102,20 @@ RUN conda install -c pytorch magma-cuda112
 # Build PyTorch From Source
 RUN git clone --recursive https://github.com/pytorch/pytorch && \
     cd pytorch && \
-    # if you are updating an existing checkout
-    git submodule sync && \
-    git submodule update --init --recursive
-
-RUN cd pytorch && \
     export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"} && \
+    export TORCH_CUDA_ARCH_LIST=3.5+PTX && \
     export USE_CUDA=1 && \
-    python setup.py install
+    python setup.py install && \
+    cd .. && \
+    rm -r pytorch
+
+RUN git clone --recursive https://github.com/pytorch/vision.git && \
+    cd vision && \
+    export FORCE_CUDA=1 && \
+    export TORCH_CUDA_ARCH_LIST=3.5+PTX && \
+    python setup.py install && \
+    cd .. && \
+    rm -r vision
 
 # Install dependencies (here for caching)
 RUN pip install --upgrade pip
