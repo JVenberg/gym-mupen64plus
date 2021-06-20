@@ -81,7 +81,7 @@ class Mupen64PlusEnv(gym.Env):
         # If the EXTERNAL_EMULATOR environment variable is True, we are running the
         # emulator out-of-process (likely via docker/docker-compose). If not, we need
         # to start the emulator in-process here
-        external_emulator = os.environ.has_key("EXTERNAL_EMULATOR") and os.environ["EXTERNAL_EMULATOR"] == 'True'
+        external_emulator = "EXTERNAL_EMULATOR" in os.environ and os.environ["EXTERNAL_EMULATOR"] == 'True'
         if not external_emulator:
             self.xvfb_process, self.emulator_process = \
                 self._start_emulator(rom_name=self.config['ROM_NAME'],
@@ -100,7 +100,7 @@ class Mupen64PlusEnv(gym.Env):
         # Restore the DISPLAY env var
         os.environ["DISPLAY"] = initial_disp
         cprint('Changed back to DISPLAY %s' % os.environ["DISPLAY"], 'red')
-        
+
 
         with self.controller_server.frame_skip_disabled():
             self._navigate_menu()
@@ -108,22 +108,22 @@ class Mupen64PlusEnv(gym.Env):
         self.observation_space = \
             spaces.Box(low=0, high=255, shape=(SCR_H, SCR_W, SCR_D))
 
-        self.action_space = spaces.MultiDiscrete([[-80, 80], # Joystick X-axis
-                                                  [-80, 80], # Joystick Y-axis
-                                                  [  0,  1], # A Button
-                                                  [  0,  1], # B Button
-                                                  [  0,  1], # RB Button
-                                                  [  0,  1], # LB Button
-                                                  [  0,  1], # Z Button
-                                                  [  0,  1], # C Right Button
-                                                  [  0,  1], # C Left Button
-                                                  [  0,  1], # C Down Button
-                                                  [  0,  1], # C Up Button
-                                                  [  0,  1], # D-Pad Right Button
-                                                  [  0,  1], # D-Pad Left Button
-                                                  [  0,  1], # D-Pad Down Button
-                                                  [  0,  1], # D-Pad Up Button
-                                                  [  0,  1], # Start Button
+        self.action_space = spaces.MultiDiscrete([160, # Joystick X-axis
+                                                  160, # Joystick Y-axis
+                                                  1, # A Button
+                                                  1, # B Button
+                                                  1, # RB Button
+                                                  1, # LB Button
+                                                  1, # Z Button
+                                                  1, # C Right Button
+                                                  1, # C Left Button
+                                                  1, # C Down Button
+                                                  1, # C Up Button
+                                                  1, # D-Pad Right Button
+                                                  1, # D-Pad Left Button
+                                                  1, # D-Pad Down Button
+                                                  1, # D-Pad Up Button
+                                                  1, # Start Button
                                                  ])
 
     def _base_load_config(self):
@@ -145,7 +145,7 @@ class Mupen64PlusEnv(gym.Env):
     def _validate_config(self):
         return
 
-    def _step(self, action):
+    def step(self, action):
         #cprint('Step %i: %s' % (self.step_count, action), 'green')
         self._act(action)
         obs = self._observe()
@@ -204,14 +204,14 @@ class Mupen64PlusEnv(gym.Env):
         return False
 
     @abc.abstractmethod
-    def _reset(self):
+    def reset(self):
         cprint('Reset called!', 'yellow')
         self.reset_count += 1
 
         self.step_count = 0
         return self._observe()
 
-    def _render(self, mode='human', close=False):
+    def render(self, mode='human', close=False):
         if close:
             if hasattr(self, 'viewer') and self.viewer is not None:
                 self.viewer.close()
@@ -382,8 +382,8 @@ class ControllerState(object):
     JOYSTICK_RIGHT     = [ 127,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
 
     def __init__(self, controls=NO_OP):
-        self.X_AXIS = controls[0]
-        self.Y_AXIS = controls[1]
+        self.X_AXIS = controls[0] - 80
+        self.Y_AXIS = controls[1] - 80
         self.A_BUTTON = controls[2]
         self.B_BUTTON = controls[3]
         self.R_TRIG = controls[4]
