@@ -51,10 +51,6 @@ RUN apt-get update && \
         ffmpeg \
         libjson-c4
 
-# Upgrade pip (pip 21.0 dropped support for Python 2.7 in January 2021 - https://stackoverflow.com/a/65896996/9526448)
-# TODO: Python3 upgrade - https://github.com/bzier/gym-mupen64plus/issues/81
-# RUN pip3 install --upgrade "pip < 21.0"
-
 # Install VirtualGL (provides vglrun to allow us to run the emulator in XVFB)
 # (Check for new releases here: https://github.com/VirtualGL/virtualgl/releases)
 ENV VIRTUALGL_VERSION=2.5.2
