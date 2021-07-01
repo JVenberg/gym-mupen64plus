@@ -125,7 +125,8 @@ RUN pip install \
     PyYAML \
     termcolor \
     mss \
-    opencv-python
+    opencv-python \
+    matplotlib
 
 # Copy compiled input plugin from buildstuff layer
 COPY --from=buildstuff /usr/local/lib/mupen64plus/mupen64plus-input-bot.so /usr/local/lib/mupen64plus/
