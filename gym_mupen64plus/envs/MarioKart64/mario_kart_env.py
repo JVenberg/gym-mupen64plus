@@ -63,8 +63,9 @@ class MarioKartEnv(Mupen64PlusEnv):
 
     def step(self, action):
         # Interpret the action choice and get the actual controller state for this step
-        controls = action + [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
-
+        print(action)
+        controls = np.hstack([action, np.zeros((11,))])
+        print(controls)
         return super(MarioKartEnv, self).step(controls)
 
     def _reset_after_race(self):
