@@ -48,9 +48,9 @@ class MarioKartEnv(Mupen64PlusEnv):
 
         self.action_space = spaces.MultiDiscrete([160,  # Joystick X-axis
                                                   160,  # Joystick Y-axis
-                                                  1,  # A Button
-                                                  1,  # B Button
-                                                  1]) # RB Button
+                                                  2,  # A Button
+                                                  2,  # B Button
+                                                  2]) # RB Button
 
     def _load_config(self):
         self.config.update(yaml.safe_load(open(os.path.join(os.path.dirname(inspect.stack()[0][1]), "mario_kart_config.yml"))))

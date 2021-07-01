@@ -110,20 +110,20 @@ class Mupen64PlusEnv(gym.Env):
 
         self.action_space = spaces.MultiDiscrete([160, # Joystick X-axis
                                                   160, # Joystick Y-axis
-                                                  1, # A Button
-                                                  1, # B Button
-                                                  1, # RB Button
-                                                  1, # LB Button
-                                                  1, # Z Button
-                                                  1, # C Right Button
-                                                  1, # C Left Button
-                                                  1, # C Down Button
-                                                  1, # C Up Button
-                                                  1, # D-Pad Right Button
-                                                  1, # D-Pad Left Button
-                                                  1, # D-Pad Down Button
-                                                  1, # D-Pad Up Button
-                                                  1, # Start Button
+                                                  2, # A Button
+                                                  2, # B Button
+                                                  2, # RB Button
+                                                  2, # LB Button
+                                                  2, # Z Button
+                                                  2, # C Right Button
+                                                  2, # C Left Button
+                                                  2, # C Down Button
+                                                  2, # C Up Button
+                                                  2, # D-Pad Right Button
+                                                  2, # D-Pad Left Button
+                                                  2, # D-Pad Down Button
+                                                  2, # D-Pad Up Button
+                                                  2, # Start Button
                                                  ])
 
     def _base_load_config(self):
